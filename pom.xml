@@ -8,6 +8,24 @@
     <artifactId>security-commons</artifactId>
     <packaging>jar</packaging>
     <version>0.0.1</version>
+
+    <distributionManagement>
+        <repository>
+            <id>nexus</id>
+            <url>http://213.249.46.206:8081/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>nexus</id>
+            <url>http://213.249.46.206:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+    <repositories>
+        <repository>
+            <id>iehr-project-repo</id>
+            <url>http://213.249.46.206:8081/repository/maven-releases/</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
