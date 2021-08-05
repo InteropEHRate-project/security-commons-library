@@ -7,7 +7,13 @@ import eu.interopehrate.security_commons.services.ca.model.GetUserCertificateReq
 import eu.interopehrate.security_commons.services.ca.model.GetUserCertificateResponse;
 import eu.interopehrate.security_commons.services.ca.model.ValidateCertificateRequest;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.Base64;
 import java.util.concurrent.ExecutionException;
 
 
@@ -39,6 +45,16 @@ public class CAServiceImpl implements CAService {
         ObjectMapper mapper = new ObjectMapper();
         String json = mapper.writeValueAsString(new ValidateCertificateRequest(certificateData));
         String result = SecurityHttpClient.createPost(uri, json);
-        return result.startsWith("CN=");
+        return result.contains("CN=");
+    }
+
+    @Override
+    public X509Certificate toX509Certificate(byte[] certificateData) throws CertificateException {
+        CertificateFactory f = CertificateFactory.getInstance("X.509");
+        //ISO-8859-1
+        String base64string = new String(certificateData, StandardCharsets.ISO_8859_1);
+        byte[] decoded = Base64.getMimeDecoder().decode(base64string);
+        X509Certificate certificate = (X509Certificate) f.generateCertificate(new ByteArrayInputStream(decoded));
+        return certificate;
     }
 }
