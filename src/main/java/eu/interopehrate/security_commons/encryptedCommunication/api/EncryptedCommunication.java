@@ -101,7 +101,7 @@ public interface EncryptedCommunication {
      * Bob generate the (same) shared secret.
      *
      */
-    public KeyAgreement bobKeyAgreementFin(PublicKey alicePubKey, KeyAgreement bobKeyAgree) throws Exception;
+    public KeyAgreement bobKeyAgreementFin(byte[] alicePubKeyEnc, KeyAgreement bobKeyAgree) throws Exception;
 
     /**
      *

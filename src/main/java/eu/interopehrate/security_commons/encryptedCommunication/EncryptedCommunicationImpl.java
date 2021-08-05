@@ -110,6 +110,7 @@ public class EncryptedCommunicationImpl implements EncryptedCommunication {
         return alicePubKeyEnc;
     }
 
+
     @Override
     public KeyPair bobInitKeyPair(byte[] alicePubKeyEnc) throws Exception {
         /*
@@ -171,12 +172,15 @@ public class EncryptedCommunicationImpl implements EncryptedCommunication {
     }
 
     @Override
-    public KeyAgreement bobKeyAgreementFin(PublicKey alicePubKey, KeyAgreement bobKeyAgree) throws Exception {
+    public KeyAgreement bobKeyAgreementFin(byte[] alicePubKeyEnc, KeyAgreement bobKeyAgree) throws Exception {
         /*
          * Bob uses Alice's public key for the first (and only) phase
          * of his version of the DH
          * protocol.
          */
+        KeyFactory bobKeyFac = KeyFactory.getInstance("DH");
+        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(alicePubKeyEnc);
+        PublicKey alicePubKey = bobKeyFac.generatePublic(x509KeySpec);
         System.out.println("BOB: Execute PHASE1 ...");
         bobKeyAgree.doPhase(alicePubKey, true);
         return bobKeyAgree;
