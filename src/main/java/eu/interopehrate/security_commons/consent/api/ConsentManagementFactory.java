@@ -1,6 +1,7 @@
-package iehr.security;
+package eu.interopehrate.security_commons.consent.api;
 
-import iehr.security.api.ConsentManagement;
+
+import eu.interopehrate.security_commons.consent.ConsentManagementImpl;
 
 /**
  * Created by smenesid on 13/12/2020.
