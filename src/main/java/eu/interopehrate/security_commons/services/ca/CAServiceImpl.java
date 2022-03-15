@@ -1,18 +1,22 @@
 package eu.interopehrate.security_commons.services.ca;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.interopehrate.security_commons.services.SecurityHttpClient;
 import eu.interopehrate.security_commons.services.ca.api.CAService;
 import eu.interopehrate.security_commons.services.ca.model.GetUserCertificateRequest;
 import eu.interopehrate.security_commons.services.ca.model.GetUserCertificateResponse;
+import eu.interopehrate.security_commons.services.ca.model.JwsCertificateHeader;
 import eu.interopehrate.security_commons.services.ca.model.ValidateCertificateRequest;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Base64;
 import java.util.concurrent.ExecutionException;
 
@@ -56,5 +60,42 @@ public class CAServiceImpl implements CAService {
         byte[] decoded = Base64.getMimeDecoder().decode(base64string);
         X509Certificate certificate = (X509Certificate) f.generateCertificate(new ByteArrayInputStream(decoded));
         return certificate;
+    }
+
+    @Override
+    public String createDetachedJws(byte[] certificateData, String signed) throws JsonProcessingException {
+        String jws = "";
+
+        //generate header
+        ObjectMapper mapper = new ObjectMapper();
+        String header = mapper.writeValueAsString(new JwsCertificateHeader("RS256",certificateData));
+        String headerPart = Base64.getUrlEncoder().encodeToString(header.getBytes(StandardCharsets.ISO_8859_1));
+        jws += headerPart + "..";
+
+        //generate signature
+        String signaturePart = Base64.getUrlEncoder().encodeToString(signed.getBytes(StandardCharsets.ISO_8859_1));
+        jws += signaturePart;
+
+        return jws;
+    }
+
+    @Override
+    public PublicKey getPublicKeyFromJws(String jwsToken) throws JsonProcessingException, CertificateException {
+        String[] chunks = jwsToken.split("\\.");
+        Base64.Decoder decoder = Base64.getUrlDecoder();
+        String header = new String(decoder.decode(chunks[0]));
+        ObjectMapper mapper = new ObjectMapper();
+        JwsCertificateHeader headerObj = mapper.readValue(header, JwsCertificateHeader.class);
+        byte[] certificateData = headerObj.getCertificate();
+        X509Certificate certificate = toX509Certificate(certificateData);
+        return certificate.getPublicKey();
+    }
+
+    @Override
+    public String getSignatureFromJws(String jwsToken) {
+        String[] chunks = jwsToken.split("\\.");
+        Base64.Decoder decoder = Base64.getUrlDecoder();
+        String signature = new String(decoder.decode(chunks[2]));
+        return signature;
     }
 }
