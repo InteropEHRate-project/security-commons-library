@@ -17,7 +17,7 @@ import java.util.concurrent.Future;
 public class SecurityHttpClient {
 
     public static String createPost(String url, String body) throws IOException, ExecutionException, InterruptedException {
-        CloseableHttpAsyncClient client = HttpAsyncClients.createDefault();
+        CloseableHttpAsyncClient client = HttpAsyncClients.createSystem();
 
         try {
             client.start();
